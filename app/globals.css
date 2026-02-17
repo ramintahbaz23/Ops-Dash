@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Notion Light Mode Colors */
+    --background: 255 255 255;
+    --foreground: 55 53 47;
+    --muted: 247 246 243;
+    --muted-foreground: 120 119 116;
+    --border: 233 233 231;
+    --accent: 59 91 219;
+    --accent-foreground: 255 255 255;
+    --card: 255 255 255;
+    --card-foreground: 55 53 47;
+    --sidebar-background: 251 251 250;
+    --sidebar-foreground: 55 53 47;
+    --sidebar-border: 233 233 231;
+  }
+
+  .dark {
+    /* Notion Dark Mode Colors */
+    --background: 25 25 25;
+    --foreground: 255 255 255;
+    --muted: 37 37 35;
+    --muted-foreground: 147 147 142;
+    --border: 47 47 45;
+    --accent: 59 91 219;
+    --accent-foreground: 255 255 255;
+    --card: 32 32 30;
+    --card-foreground: 255 255 255;
+    --sidebar-background: 32 32 30;
+    --sidebar-foreground: 255 255 255;
+    --sidebar-border: 47 47 45;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@keyframes dots {
+  0%, 20% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-dots {
+  animation: dots 1.4s infinite;
+}
+
