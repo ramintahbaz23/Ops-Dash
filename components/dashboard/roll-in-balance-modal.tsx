@@ -1,5 +1,6 @@
 'use client'
 
+// Roll-in balance modal
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
