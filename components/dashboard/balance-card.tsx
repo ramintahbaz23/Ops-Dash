@@ -37,7 +37,7 @@ export function BalanceCard({
       )}
     >
       <p className="text-lg font-medium text-muted-foreground mb-2">
-        Payment Plan balance
+        Payment plan balance
       </p>
       
       <p className="text-4xl font-semibold mb-1">${paymentPlanBalance.toFixed(2)}</p>
