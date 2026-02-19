@@ -50,17 +50,18 @@ export function CustomerHeader({ customer, onUpdate, showTranscription = false, 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={() => setShowEditModal(true)}
-            className="ml-2 px-2 py-1 rounded-md border border-border hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm"
+            className="ml-2 px-2 py-1 rounded-md border border-neutral-300 hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm"
             aria-label="Edit customer details"
           >
             <Edit2 size={14} />
             <span>Edit</span>
           </motion.button>
+          <SendToCustomerDropdown customer={customer} />
         </div>
         {!showTranscription && onToggleTranscription && (
           <button
             onClick={onToggleTranscription}
-            className="px-4 py-2 text-base font-medium bg-muted border border-border text-foreground hover:bg-muted/80 rounded-md transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
+            className="px-4 py-2 text-base font-medium bg-muted border border-neutral-300 text-foreground hover:bg-muted/80 rounded-md transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
             aria-label="Toggle live transcription"
           >
             <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500 shrink-0" aria-hidden />
@@ -92,7 +93,6 @@ export function CustomerHeader({ customer, onUpdate, showTranscription = false, 
             <MapPin size={16} />
             <span>{customer.address}</span>
           </div>
-          <SendToCustomerDropdown customer={customer} />
         </div>
       </div>
 

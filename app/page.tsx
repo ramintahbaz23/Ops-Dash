@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { use, useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { CustomerHeader } from '@/components/dashboard/customer-header'
 import { MetricCard } from '@/components/dashboard/metric-card'
@@ -54,7 +54,16 @@ function getSearchResults(query: string): SearchResult[] {
   )
 }
 
-export default function Dashboard() {
+type DashboardProps = {
+  params?: Promise<Record<string, string | string[] | undefined>>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default function Dashboard({ params, searchParams }: DashboardProps = {}) {
+  // Next.js 15+: params and searchParams are Promises; unwrap to avoid enumeration warnings
+  use(params ?? Promise.resolve({}))
+  use(searchParams ?? Promise.resolve({}))
+
   const [customer, setCustomer] = useState<Customer>(mockCustomer)
   const [showTranscription, setShowTranscription] = useState(false)
   const [callAnswered, setCallAnswered] = useState<boolean>(false)
@@ -483,7 +492,7 @@ export default function Dashboard() {
         </div>
 
         {/* Data Info - z-0 so it sits behind the live call drawer */}
-        <div className="fixed bottom-4 right-4 z-0 text-sm text-muted-foreground space-y-0.5">
+        <div className="fixed bottom-4 right-4 z-0 text-xs text-muted-foreground space-y-0.5">
           <div>Last time data received: Feb 3, 2026, 8:02 PM EST</div>
           <div>Last time account balance updated: Feb 3, 2026, 7:51 PM EST</div>
         </div>
