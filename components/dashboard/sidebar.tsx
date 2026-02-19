@@ -96,13 +96,21 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
           </svg>
           Dashboard
         </button>
-        {currentCustomerName && (
+        {/* Current customer or live call pill - when call answered, show live call here instead */}
+        {(callAnswered && hasLiveCall) ? (
+          <div className="px-3 py-2">
+            <div className="rounded-md px-3 py-2 flex items-center gap-2" style={{ backgroundColor: '#EBEBEB' }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+              <p className="text-base font-medium">{mockLiveCall.customer.name}</p>
+            </div>
+          </div>
+        ) : currentCustomerName ? (
           <div className="px-3 py-2">
             <div className="rounded-md px-3 py-2" style={{ backgroundColor: '#EBEBEB' }}>
               <p className="text-base font-medium">{currentCustomerName}</p>
             </div>
           </div>
-        )}
+        ) : null}
         {/* Recently Viewed */}
         {mockRecentlyViewed.length > 0 && (
           <div className="px-2 py-2 shrink-0">
@@ -131,8 +139,8 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
 
       {/* Live Call & Call Queue Section */}
       <div className="flex-1 overflow-y-auto">
-        {/* Live Call Section - Only show when active */}
-        {hasLiveCall && (
+        {/* Live Call Section - Only show when active and not yet answered (waiting state) */}
+        {hasLiveCall && !callAnswered && (
           <div className="px-6 pt-2 pb-4">
             <p className="text-sm text-muted-foreground mb-2">Live call</p>
             <motion.div
@@ -141,10 +149,7 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
               className="bg-muted rounded-lg p-3"
             >
               <div className="flex items-center gap-2">
-                <div className={cn(
-                  "w-1.5 h-1.5 rounded-full animate-pulse",
-                  callAnswered ? "bg-green-500" : "bg-blue-500"
-                )} />
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-blue-500" />
                 <p className="text-base font-medium">{mockLiveCall.customer.name}</p>
               </div>
             </motion.div>

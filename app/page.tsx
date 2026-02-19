@@ -482,8 +482,8 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Data Info */}
-        <div className="fixed bottom-4 right-4 text-sm text-muted-foreground space-y-0.5">
+        {/* Data Info - z-0 so it sits behind the live call drawer */}
+        <div className="fixed bottom-4 right-4 z-0 text-sm text-muted-foreground space-y-0.5">
           <div>Last time data received: Feb 3, 2026, 8:02 PM EST</div>
           <div>Last time account balance updated: Feb 3, 2026, 7:51 PM EST</div>
         </div>
@@ -494,6 +494,7 @@ export default function Dashboard() {
         isOpen={showTranscription}
         onClose={() => setShowTranscription(false)}
         onCallAnsweredChange={setCallAnswered}
+        onApplyReschedule={() => handleCustomerUpdate({ nextPaymentDate: 'January 7th, 2025' })}
       />
 
       {/* Manage Plan Modals */}

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { ChevronRight, Phone, Mic, Pause, ArrowRightLeft, PhoneOff } from 'lucide-react'
+import { ChevronRight, Phone, Mic, Pause, ArrowRightLeft, PhoneOff, X } from 'lucide-react'
 import { mockLiveCall, TranscriptMessage } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 
@@ -11,6 +12,7 @@ interface LiveTranscriptionPanelProps {
   isOpen: boolean
   onClose: () => void
   onCallAnsweredChange?: (answered: boolean) => void
+  onApplyReschedule?: () => void
 }
 
 function TranscriptMessageItem({ 
@@ -52,7 +54,7 @@ function TranscriptMessageItem({
 
   const styles = getMessageStyles()
 
-  const handleActionClick = (action: typeof message.actions[0]) => {
+  const handleActionClick = (action: NonNullable<TranscriptMessage['actions']>[number]) => {
     if (action.label === 'Apply reschedule' && onApplyReschedule) {
       onApplyReschedule()
     } else if (action.label === 'View impact' && onViewImpact) {
@@ -113,16 +115,10 @@ function TranscriptMessageItem({
         </p>
         {message.actions && message.actions.length > 0 && (
           <div className="flex gap-2 mt-3">
-            {message.actions.map((action, idx) => {
-              const isViewImpact = action.label === 'View impact'
-              return (
+            {message.actions.map((action, idx) => (
                 <button
                   key={idx}
-                  onClick={() => {
-                    if (!isViewImpact) {
-                      handleActionClick(action)
-                    }
-                  }}
+                  onClick={() => handleActionClick(action)}
                   className={cn(
                     "px-4 py-2 rounded-md text-base font-medium transition-colors",
                     action.variant === 'primary'
@@ -132,8 +128,7 @@ function TranscriptMessageItem({
                 >
                   {action.label}
                 </button>
-              )
-            })}
+            ))}
           </div>
         )}
       </div>
@@ -141,7 +136,7 @@ function TranscriptMessageItem({
   )
 }
 
-export function LiveTranscriptionPanel({ isOpen, onClose, onCallAnsweredChange }: LiveTranscriptionPanelProps) {
+export function LiveTranscriptionPanel({ isOpen, onClose, onCallAnsweredChange, onApplyReschedule }: LiveTranscriptionPanelProps) {
   const [visibleMessages, setVisibleMessages] = useState<number>(0)
   const [callDuration, setCallDuration] = useState<number>(0) // Duration in seconds
   const [showImpactInfo, setShowImpactInfo] = useState<boolean>(false)
@@ -163,12 +158,23 @@ export function LiveTranscriptionPanel({ isOpen, onClose, onCallAnsweredChange }
     if (actionMessageIndex >= 0 && visibleMessages === actionMessageIndex + 1) {
       setVisibleMessages(actionMessageIndex + 2)
     }
+    onApplyReschedule?.()
   }
 
   const handleViewImpact = () => {
-    // Show the impact information (same as reschedule applied message)
     setShowImpactInfo(true)
   }
+
+  // Forward-looking copy for the impact modal (what will happen if they apply)
+  const impactModalContent = `If you apply this reschedule, the following will happen:
+
+Payment dates will change:
+Dec 27 → Jan 7, 2026 ($120.69)
+Jan 27 → Feb 7, 2026 ($120.69)
+Feb 27 → Mar 7, 2026 ($120.69)
+Mar 27 → Apr 7, 2026 ($120.69)
+
+Sarah will be notified via Email & SMS`
 
   // Format duration as MM:SS
   const formatDuration = (seconds: number) => {
@@ -265,7 +271,56 @@ export function LiveTranscriptionPanel({ isOpen, onClose, onCallAnsweredChange }
     onCallAnsweredChange?.(true)
   }
 
+  const impactModal = showImpactInfo && typeof document !== 'undefined' && createPortal(
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.15 }}
+        onClick={() => setShowImpactInfo(false)}
+        className="fixed inset-0 bg-black/50 z-[100]"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+      >
+        <div
+          className="bg-card border border-border rounded-lg shadow-xl max-w-lg w-full flex flex-col pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
+            <h2 className="text-lg font-semibold">Reschedule impact</h2>
+            <button
+              onClick={() => setShowImpactInfo(false)}
+              className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+              aria-label="Close modal"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <p className="text-base leading-relaxed whitespace-pre-line text-foreground">
+              {impactModalContent}
+            </p>
+          </div>
+          <div className="px-6 py-4 border-t border-border flex justify-end shrink-0">
+            <button
+              onClick={() => setShowImpactInfo(false)}
+              className="px-4 py-2 text-base font-medium bg-accent text-accent-foreground hover:bg-accent/90 rounded-md transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </>,
+    document.body
+  )
+
   return (
+    <>
     <motion.aside
       animate={{ 
         width: isOpen ? 520 : 0,
@@ -273,7 +328,7 @@ export function LiveTranscriptionPanel({ isOpen, onClose, onCallAnsweredChange }
       }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className={cn(
-        "h-full shrink-0 overflow-hidden",
+        "relative z-40 h-full shrink-0 overflow-hidden",
         "bg-card border-l border-border shadow-xl",
         "flex flex-col",
         !isOpen && "border-0 pointer-events-none"
@@ -397,33 +452,13 @@ export function LiveTranscriptionPanel({ isOpen, onClose, onCallAnsweredChange }
                     onViewImpact={handleViewImpact}
                   />
                 ))}
-                {/* Show impact info when View impact is clicked */}
-                {showImpactInfo && successMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex gap-3 p-4 rounded-lg bg-muted border border-border"
-                  >
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-black">
-                      <span className="text-white text-sm font-bold">P</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm text-muted-foreground">Agent</p>
-                        <span className="text-sm text-muted-foreground">• Impact Preview</span>
-                      </div>
-                      <p className="text-base leading-relaxed whitespace-pre-line text-foreground">
-                        {successMessage.text}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
               </div>
             </div>
         </div>
       )}
     </motion.aside>
+    {impactModal}
+    </>
   )
 }
 

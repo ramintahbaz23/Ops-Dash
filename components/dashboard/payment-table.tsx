@@ -130,7 +130,7 @@ export function PaymentTable({ nextPaymentDate, nextPaymentAmount, paymentHistor
                   <p className="text-base text-muted-foreground pl-16 flex items-center gap-1.5">
                     {hasBankInfo ? (
                       <>
-                        {renderBankName(receipt.bankName)} ••••{receipt.bankAccountLast4}
+                        {renderBankName(receipt!.bankName ?? '')} ••••{receipt!.bankAccountLast4}
                       </>
                     ) : (
                       receipt?.paymentMethod || '—'

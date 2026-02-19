@@ -41,7 +41,7 @@ export function BalanceCard({
       </p>
       
       <p className="text-4xl font-semibold mb-1">${paymentPlanBalance.toFixed(2)}</p>
-      <p className="text-base text-muted-foreground flex items-center gap-1.5">
+      <div className="text-base text-muted-foreground flex items-center gap-1.5">
         <InfoDialog
           title="LADWP"
           content={`Total due to LADWP: $724.15\nPast due to LADWP: $241.39\nNew charges, not past due: $482.76`}
@@ -51,7 +51,7 @@ export function BalanceCard({
             <Info size={14} className="text-muted-foreground" />
           </span>
         </InfoDialog>
-      </p>
+      </div>
     </motion.div>
   )
 }
