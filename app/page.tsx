@@ -13,7 +13,7 @@ import { MakePaymentModal } from '@/components/dashboard/make-payment-modal'
 import { UpdatePaymentMethodModal } from '@/components/dashboard/update-payment-method-modal'
 import { RescheduleModal } from '@/components/dashboard/reschedule-modal'
 import { RollInBalanceModal } from '@/components/dashboard/roll-in-balance-modal'
-import { mockCustomer, Customer } from '@/lib/mock-data'
+import { mockCustomer, Customer, getMockCustomerById, mockRecentlyViewed, type RecentlyViewedCustomer } from '@/lib/mock-data'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
@@ -65,6 +65,7 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
   use(searchParams ?? Promise.resolve({}))
 
   const [customer, setCustomer] = useState<Customer>(mockCustomer)
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedCustomer[]>(mockRecentlyViewed)
   const [showTranscription, setShowTranscription] = useState(false)
   const [callAnswered, setCallAnswered] = useState<boolean>(false)
   const [showToast, setShowToast] = useState(true)
@@ -91,6 +92,17 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
     setSearchQuery(query)
     setIsSearchFocused(isFocused)
     setActiveResultIndex(0)
+  }
+
+  const handleSelectRecentCustomer = (id: string) => {
+    const nextCustomer = getMockCustomerById(id)
+    if (!nextCustomer) return
+    // Add current customer to recently viewed (at front, dedupe)
+    setRecentlyViewed((prev) => [
+      { id: customer.id, name: customer.name },
+      ...prev.filter((c) => c.id !== customer.id),
+    ].slice(0, 10))
+    setCustomer(nextCustomer)
   }
 
   const searchResults = searchQuery.length > 0 ? getSearchResults(searchQuery) : []
@@ -342,6 +354,9 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
         callAnswered={callAnswered}
         onSearchChange={handleSearchChange}
         currentCustomerName={customer.name}
+        currentCustomerId={customer.id}
+        recentlyViewed={recentlyViewed}
+        onSelectRecentCustomer={handleSelectRecentCustomer}
       />
       <SearchResultsPanel
         isOpen={showResultsPanel}

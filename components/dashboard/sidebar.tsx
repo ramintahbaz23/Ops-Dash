@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { mockLiveCall, mockRecentlyViewed } from '@/lib/mock-data'
+import { mockLiveCall } from '@/lib/mock-data'
+import type { RecentlyViewedCustomer } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 import { Search } from 'lucide-react'
 
@@ -12,9 +13,12 @@ interface SidebarProps {
   callAnswered?: boolean
   onSearchChange?: (query: string, isFocused: boolean) => void
   currentCustomerName?: string
+  currentCustomerId?: string
+  recentlyViewed?: RecentlyViewedCustomer[]
+  onSelectRecentCustomer?: (id: string) => void
 }
 
-export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChange, currentCustomerName }: SidebarProps) {
+export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChange, currentCustomerName, currentCustomerId, recentlyViewed = [], onSelectRecentCustomer }: SidebarProps) {
   const [imageError, setImageError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -112,11 +116,11 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
           </div>
         ) : null}
         {/* Recently Viewed */}
-        {mockRecentlyViewed.length > 0 && (
+        {recentlyViewed.filter((c) => c.id !== currentCustomerId).length > 0 && (
           <div className="px-2 py-2 shrink-0">
             <p className="text-sm text-muted-foreground mb-2 px-3">Recently viewed</p>
             <div className="space-y-1">
-              {mockRecentlyViewed.map((customer) => (
+              {recentlyViewed.filter((c) => c.id !== currentCustomerId).map((customer) => (
                 <motion.div
                   key={customer.id}
                   initial={{ opacity: 0, x: -10 }}
@@ -128,6 +132,7 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
                   }}
+                  onClick={() => onSelectRecentCustomer?.(customer.id)}
                 >
                   <p className="text-base">{customer.name}</p>
                 </motion.div>

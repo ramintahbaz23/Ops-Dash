@@ -156,6 +156,157 @@ export const mockCustomer: Customer & {
   ],
 };
 
+export type MockCustomer = Customer & {
+  smsOptIn?: boolean
+  languagePreference?: string
+  internalClientId?: string
+  amplitudeUserId?: string
+  ownerPermissionStatus?: string
+  isTestAccount?: boolean
+}
+
+export const mockCustomerMichaelChen: MockCustomer = {
+  id: '1',
+  name: 'Michael Chen',
+  email: 'm.chen@email.com',
+  phone: '(555) 987-6543',
+  address: '4521 Oak Ave, San Francisco, CA 94102',
+  accountNumber: '#142612-0005088',
+  currentBalance: 318.50,
+  utilityTotalBalance: 518.50,
+  paymentPlanBalance: 318.50,
+  nextPayment: 106.17,
+  nextPaymentDate: 'March 15th, 2026',
+  planLength: 6,
+  monthsRemaining: 3,
+  activePlan: true,
+  autoPay: false,
+  eligibleForExtension: true,
+  eligibleForRollIn: true,
+  smsOptIn: true,
+  languagePreference: 'English',
+  internalClientId: 'CLT-142612-0005088',
+  amplitudeUserId: 'amp-142612-0005088',
+  ownerPermissionStatus: 'Owner',
+  isTestAccount: false,
+  payments: [
+    {
+      date: 'December 15th, 2025',
+      amount: 106.17,
+      status: 'paid',
+      receipt: {
+        referenceId: 'TXN-2025-12-15-008899',
+        cardLast4: '8765',
+        cardBrand: 'Mastercard',
+        paymentMethod: 'Debit Card',
+        transactionDate: 'December 15th, 2025',
+        transactionTime: '2:15 PM',
+        bankAccountLast4: undefined,
+        bankName: undefined,
+      },
+    },
+    {
+      date: 'January 15th, 2026',
+      amount: 106.17,
+      status: 'paid',
+      receipt: {
+        referenceId: 'TXN-2026-01-15-009900',
+        cardLast4: '8765',
+        cardBrand: 'Mastercard',
+        paymentMethod: 'Debit Card',
+        transactionDate: 'January 15th, 2026',
+        transactionTime: '2:15 PM',
+        bankAccountLast4: undefined,
+        bankName: undefined,
+      },
+    },
+    {
+      date: 'February 15th, 2026',
+      amount: 106.17,
+      status: 'pending',
+      receipt: undefined,
+    },
+    {
+      date: 'March 15th, 2026',
+      amount: 106.17,
+      status: 'upcoming',
+      receipt: undefined,
+    },
+  ],
+};
+
+const mockCustomerEmilyRodriguez: MockCustomer = {
+  id: '2',
+  name: 'Emily Rodriguez',
+  email: 'e.rodriguez@email.com',
+  phone: '(555) 246-8135',
+  address: '789 Pine St, Austin, TX 78701',
+  accountNumber: '#142612-0005099',
+  currentBalance: 0,
+  utilityTotalBalance: 0,
+  paymentPlanBalance: 0,
+  nextPayment: 0,
+  nextPaymentDate: 'N/A',
+  planLength: 0,
+  monthsRemaining: 0,
+  activePlan: false,
+  autoPay: false,
+  eligibleForExtension: false,
+  eligibleForRollIn: false,
+  smsOptIn: false,
+  languagePreference: 'Spanish',
+  internalClientId: 'CLT-142612-0005099',
+  amplitudeUserId: 'amp-142612-0005099',
+  ownerPermissionStatus: 'Owner',
+  isTestAccount: false,
+  payments: [],
+};
+
+const mockCustomerDavidThompson: MockCustomer = {
+  id: '3',
+  name: 'David Thompson',
+  email: 'd.thompson@email.com',
+  phone: '(555) 369-2580',
+  address: '1200 Lake Dr, Seattle, WA 98101',
+  accountNumber: '#142612-0005100',
+  currentBalance: 195.00,
+  utilityTotalBalance: 395.00,
+  paymentPlanBalance: 195.00,
+  nextPayment: 65.00,
+  nextPaymentDate: 'April 1st, 2026',
+  planLength: 6,
+  monthsRemaining: 3,
+  activePlan: true,
+  autoPay: true,
+  eligibleForExtension: false,
+  eligibleForRollIn: false,
+  smsOptIn: true,
+  languagePreference: 'English',
+  internalClientId: 'CLT-142612-0005100',
+  amplitudeUserId: 'amp-142612-0005100',
+  ownerPermissionStatus: 'Owner',
+  isTestAccount: false,
+  payments: [
+    {
+      date: 'March 1st, 2026',
+      amount: 65.00,
+      status: 'upcoming',
+      receipt: undefined,
+    },
+  ],
+};
+
+const mockCustomersById: Record<string, MockCustomer> = {
+  [mockCustomer.id]: mockCustomer as MockCustomer,
+  '1': mockCustomerMichaelChen,
+  '2': mockCustomerEmilyRodriguez,
+  '3': mockCustomerDavidThompson,
+};
+
+export function getMockCustomerById(id: string): MockCustomer | undefined {
+  return mockCustomersById[id];
+}
+
 export const mockCallQueue: CallQueueItem[] = [
   { id: '1', name: 'David Cuthrell', status: 'waiting' },
   { id: '2', name: 'Chris Jones', status: 'waiting' },
