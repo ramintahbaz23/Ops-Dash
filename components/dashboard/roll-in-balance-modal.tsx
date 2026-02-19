@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
@@ -20,13 +20,6 @@ export function RollInBalanceModal({
   onConfirm 
 }: RollInBalanceModalProps) {
   const [amount, setAmount] = useState<string>(utilityBalance.toFixed(2))
-
-  // Sync amount to current utility balance whenever the modal opens or balance changes
-  useEffect(() => {
-    if (isOpen) {
-      setAmount(utilityBalance.toFixed(2))
-    }
-  }, [isOpen, utilityBalance])
 
   const handleConfirm = () => {
     const numAmount = parseFloat(amount)
