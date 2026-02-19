@@ -307,9 +307,9 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
       // Reduce utility balance
       updated.utilityTotalBalance = Math.max(0, updated.utilityTotalBalance - amount)
       // Recalculate next payment (distribute across remaining months)
-      const remainingMonths = updated.planLength - updated.monthsRemaining
-      if (remainingMonths > 0) {
-        updated.nextPayment = (updated.paymentPlanBalance / remainingMonths)
+      const monthsLeft = updated.monthsRemaining
+      if (monthsLeft > 0) {
+        updated.nextPayment = (updated.paymentPlanBalance / monthsLeft)
       }
       return updated
     })
