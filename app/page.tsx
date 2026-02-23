@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/dashboard/sidebar'
-import { CustomerHeader } from '@/components/dashboard/customer-header'
+import { ClientIdentity } from '@/components/dashboard/client-identity'
 import { MetricCard } from '@/components/dashboard/metric-card'
 import { BalanceCard } from '@/components/dashboard/balance-card'
 import { PaymentTable } from '@/components/dashboard/payment-table'
@@ -68,7 +68,6 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedCustomer[]>(mockRecentlyViewed)
   const [showTranscription, setShowTranscription] = useState(false)
   const [callAnswered, setCallAnswered] = useState<boolean>(false)
-  const [showToast, setShowToast] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [activeResultIndex, setActiveResultIndex] = useState(0)
@@ -349,15 +348,49 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" ref={searchAreaRef}>
-      <Sidebar 
-        hasLiveCall={callAnswered} 
-        callAnswered={callAnswered}
-        onSearchChange={handleSearchChange}
-        currentCustomerName={customer.name}
-        currentCustomerId={customer.id}
-        recentlyViewed={recentlyViewed}
-        onSelectRecentCustomer={handleSelectRecentCustomer}
-      />
+      {/* Sidebar + transcript drawer wrapper: expands when transcript is open */}
+      <div
+        className={cn(
+          'flex h-screen shrink-0 transition-all duration-300',
+          showTranscription ? 'w-[760px]' : 'w-60'
+        )}
+      >
+        <Sidebar
+          hasLiveCall={true}
+          callAnswered={callAnswered}
+          onSearchChange={handleSearchChange}
+          currentCustomerName={customer.name}
+          currentCustomerId={customer.id}
+          recentlyViewed={recentlyViewed}
+          onSelectRecentCustomer={handleSelectRecentCustomer}
+          isTranscriptOpen={showTranscription}
+          onToggleTranscript={() => setShowTranscription(!showTranscription)}
+        />
+        {/* Transcript drawer: 520px panel to the right of sidebar; shadow over main, below sidenav */}
+        <div
+          className={cn(
+            'relative z-0 h-full shrink-0 overflow-hidden',
+            showTranscription ? 'w-[520px] opacity-100 pointer-events-auto' : 'w-0 opacity-0 pointer-events-none'
+          )}
+          style={{
+            transition: showTranscription
+              ? 'width 0.3s ease, opacity 0.2s ease 0.15s'
+              : 'width 0.3s ease, opacity 0.2s ease',
+            boxShadow: showTranscription ? '2px 0 12px -2px rgba(0,0,0,0.05), 4px 0 16px -4px rgba(0,0,0,0.03)' : 'none',
+          }}
+        >
+          {showTranscription ? (
+            <div className="w-[520px] h-full">
+              <LiveTranscriptionPanel
+                isOpen={showTranscription}
+                onClose={() => setShowTranscription(false)}
+                onCallAnsweredChange={setCallAnswered}
+                onApplyReschedule={() => handleCustomerUpdate({ nextPaymentDate: 'January 7th, 2025' })}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
       <SearchResultsPanel
         isOpen={showResultsPanel}
         query={searchQuery}
@@ -366,10 +399,15 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
         onSelect={handleSelectResult}
         onClose={() => setIsSearchFocused(false)}
       />
-      <main className={cn(
-        "overflow-y-auto p-8 relative transition-all duration-300",
-        showTranscription ? "flex-1" : "flex-1"
-      )}>
+      <div className="flex-1 flex flex-col min-h-0 min-w-0">
+        <main
+          className={cn(
+            'overflow-y-auto pt-7 px-7 pb-8 relative transition-all duration-300 flex-1',
+            showTranscription ? '' : ''
+          )}
+        >
+        <ClientIdentity customer={customer} onUpdate={handleCustomerUpdate} />
+
         {/* Notification Toast */}
         <AnimatePresence>
           {notificationToast && (
@@ -395,50 +433,9 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
           )}
         </AnimatePresence>
 
-        <CustomerHeader 
-          customer={customer} 
-          onUpdate={handleCustomerUpdate}
-          showTranscription={showTranscription}
-          onToggleTranscription={() => setShowTranscription(!showTranscription)}
-        />
-
-        {/* Dismissable Toast */}
-        <AnimatePresence>
-          {showToast && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="mb-4 bg-orange-50/60 rounded-lg p-4 relative"
-            >
-              <button
-                onClick={() => setShowToast(false)}
-                className="absolute top-3 right-3 p-1 rounded-md hover:bg-muted-foreground/10 transition-colors"
-                aria-label="Dismiss"
-              >
-                <X size={16} className="text-muted-foreground" />
-              </button>
-              <div className="pr-6">
-                <p className="text-base text-foreground leading-relaxed flex items-center gap-2">
-                  <svg data-testid="geist-icon" height="16" strokeLinejoin="round" viewBox="0 0 16 16" width="16" style={{ color: 'currentcolor' }}>
-                    <path fillRule="evenodd" clipRule="evenodd" d="M8.55846 2H7.44148L1.88975 13.5H14.1102L8.55846 2ZM9.90929 1.34788C9.65902 0.829456 9.13413 0.5 8.55846 0.5H7.44148C6.86581 0.5 6.34092 0.829454 6.09065 1.34787L0.192608 13.5653C-0.127943 14.2293 0.355835 15 1.09316 15H14.9068C15.6441 15 16.1279 14.2293 15.8073 13.5653L9.90929 1.34788ZM8.74997 4.75V5.5V8V8.75H7.24997V8V5.5V4.75H8.74997ZM7.99997 12C8.55226 12 8.99997 11.5523 8.99997 11C8.99997 10.4477 8.55226 10 7.99997 10C7.44769 10 6.99997 10.4477 6.99997 11C6.99997 11.5523 7.44769 12 7.99997 12Z" fill="currentColor" />
-                  </svg>
-                  <span className="font-semibold" style={{ color: '#262626' }}>Ask client if services are on:</span>
-                </p>
-                <p className="text-base mt-2 leading-relaxed" style={{ color: '#404040' }}>
-                  If services are on, enroll normally.
-                </p>
-                <p className="text-base mt-1 leading-relaxed" style={{ color: '#404040' }}>
-                  If services are off, client needs to pay 50% of their total due and enroll in plan. Then blind transfer to LADWP. If client doesn't want to transfer, let client know they need to call LADWP directly at <strong>(513) 591-7700</strong> to have service restored.
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Metric Cards */}
-        <div className="grid grid-cols-3 gap-0 mb-6">
+        <p className="text-xs font-semibold tracking-widest text-muted-foreground mt-10 mb-2">PAYMENT PLAN</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 mb-6">
           <BalanceCard
             utilityTotalBalance={customer.utilityTotalBalance}
             paymentPlanBalance={customer.paymentPlanBalance}
@@ -458,20 +455,38 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
           />
         </div>
 
-        {/* Payment History */}
+        {/* Payment plan schedule */}
         <div className="mb-6 mt-8">
-          {/* Payment Schedule Header */}
-          <div className="mb-4 flex items-center gap-4">
-            <h2 className="text-2xl font-semibold">Payment plan schedule</h2>
-            <div className="relative" ref={managePlanRef}>
+          {/* Action bar: summary + primary CTA */}
+          <div className="mb-4 bg-white border border-border rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <p className="text-base text-muted-foreground">
+              Next auto-payment of ${customer.nextPayment.toFixed(2)} on{' '}
+              {(() => {
+                const d = customer.nextPaymentDate.replace(/(\d+)(st|nd|rd|th),/, '$1,')
+                try {
+                  const date = new Date(d)
+                  if (!Number.isNaN(date.getTime())) {
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  }
+                } catch (_) {}
+                return customer.nextPaymentDate
+              })()}{' '}
+              via{' '}
+              {customer.payments[0]?.receipt?.bankName && customer.payments[0]?.receipt?.bankAccountLast4
+                ? `${customer.payments[0].receipt.bankName.replace(/\s+Bank$/, '')} ••••${customer.payments[0].receipt.bankAccountLast4}`
+                : customer.payments[0]?.receipt?.paymentMethod
+                  ? customer.payments[0].receipt.paymentMethod
+                  : 'payment method'}
+              . Make changes or process a payment now.
+            </p>
+            <div className="relative shrink-0" ref={managePlanRef}>
               <button
+                type="button"
                 onClick={() => setShowManagePlan(!showManagePlan)}
-                className="px-4 py-2 text-base font-medium bg-muted border border-border text-foreground hover:bg-muted/80 rounded-md transition-colors whitespace-nowrap"
+                className="min-h-[44px] px-5 py-2.5 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90 rounded-md transition-colors whitespace-nowrap"
               >
                 Manage plan
               </button>
-
-              {/* Dropdown Menu */}
               <AnimatePresence>
                 {showManagePlan && (
                   <motion.div
@@ -486,7 +501,7 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
                         <button
                           key={index}
                           onClick={() => handleManagePlanAction(action.label)}
-                          className="w-full px-4 py-2 text-base text-left hover:bg-muted transition-colors"
+                          className="w-full min-h-[44px] px-4 py-2 text-base text-left hover:bg-muted transition-colors"
                         >
                           {action.label}
                         </button>
@@ -497,12 +512,15 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
               </AnimatePresence>
             </div>
           </div>
+
+          <p className="text-xs font-semibold tracking-widest text-muted-foreground mt-10 mb-2 uppercase">Payment activity</p>
           <PaymentTable 
             nextPaymentDate={customer.nextPaymentDate}
             nextPaymentAmount={customer.nextPayment}
             paymentHistory={customer.payments}
             autoPay={customer.autoPay}
             eligibleForExtension={customer.eligibleForExtension}
+            onPayNow={() => setShowMakePaymentModal(true)}
           />
         </div>
 
@@ -512,14 +530,7 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
           <div>Last time account balance updated: Feb 3, 2026, 7:51 PM EST</div>
         </div>
       </main>
-
-      {/* Live Transcription Panel */}
-      <LiveTranscriptionPanel
-        isOpen={showTranscription}
-        onClose={() => setShowTranscription(false)}
-        onCallAnsweredChange={setCallAnswered}
-        onApplyReschedule={() => handleCustomerUpdate({ nextPaymentDate: 'January 7th, 2025' })}
-      />
+      </div>
 
       {/* Manage Plan Modals */}
       <NotEligibleModal

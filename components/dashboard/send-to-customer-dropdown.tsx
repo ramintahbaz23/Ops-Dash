@@ -99,7 +99,7 @@ export function SendToCustomerDropdown({ customer }: SendToCustomerDropdownProps
       <div className="relative" ref={ref}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="px-2 py-1 rounded-md border border-neutral-300 hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm"
+          className="min-h-[44px] px-5 py-2.5 rounded-md border border-neutral-300 hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-base font-semibold"
         >
           <svg data-testid="geist-icon" height={16} width={16} viewBox="0 0 16 16" fill="currentColor" className="shrink-0" aria-hidden>
             <path fillRule="evenodd" clipRule="evenodd" d="M14.7477 0.293701L0.747695 5.2937L0.730713 6.70002L6.81589 9.04047C6.88192 9.06586 6.93409 9.11804 6.95948 9.18406L9.29994 15.2692L10.7063 15.2523L15.7063 1.25226L14.7477 0.293701ZM7.31426 7.62503L3.15693 6.02605L12.1112 2.8281L7.31426 7.62503ZM8.37492 8.68569L9.9739 12.843L13.1719 3.88876L8.37492 8.68569Z" />
@@ -113,7 +113,7 @@ export function SendToCustomerDropdown({ customer }: SendToCustomerDropdownProps
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute left-0 top-full mt-2 w-48 bg-card border border-border rounded-md shadow-lg z-50"
+              className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-md shadow-lg z-50"
             >
               <div className="py-1">
                 {sendToCustomerActions.map((action, index) => (

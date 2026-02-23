@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { ChevronRight, Phone, Mic, Pause, ArrowRightLeft, PhoneOff, X } from 'lucide-react'
+import { Phone, Mic, Pause, ArrowRightLeft, PhoneOff, X } from 'lucide-react'
 import { mockLiveCall, TranscriptMessage } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 
@@ -344,50 +344,59 @@ Sarah will be notified via Email & SMS`
                   callAnswered ? "bg-green-500" : "bg-blue-500"
                 )} />
                 <div>
-                  <h2 className="text-base font-semibold">{callAnswered ? 'Live call' : 'Call waiting...'}</h2>
+                  <h2 className="text-base font-semibold">{callAnswered ? 'Call in progress' : 'Call waiting...'}</h2>
                   <p className="text-sm text-muted-foreground">{mockLiveCall.customer.name}</p>
                 </div>
+                {callAnswered && (
+                  <div className="flex items-end gap-0.5 h-4 ml-2" aria-hidden>
+                    {(() => {
+                      const heights = [6, 10, 14, 10, 5, 12, 14, 8, 7, 12, 6, 10]
+                      return heights.map((h, i) => (
+                        <div
+                          key={i}
+                          className="w-0.5 rounded-full animate-sound-bar min-h-[4px] bg-black"
+                          style={{
+                            height: h,
+                            animationDelay: `${(i * 0.08) % 1}s`,
+                          }}
+                        />
+                      ))
+                    })()}
+                  </div>
+                )}
               </div>
               <button
                 onClick={onClose}
                 className="p-2 rounded-md hover:bg-muted transition-colors"
                 aria-label="Close transcription panel"
               >
-                <ChevronRight size={20} />
+                <svg data-testid="geist-icon" height={16} width={16} strokeLinejoin="round" viewBox="0 0 16 16" style={{ color: 'currentColor' }} fill="currentColor" aria-hidden>
+                  <path fillRule="evenodd" clipRule="evenodd" d="M6.46966 13.7803L6.99999 14.3107L8.06065 13.25L7.53032 12.7197L3.56065 8.75001H14.25H15V7.25001H14.25H3.56065L7.53032 3.28034L8.06065 2.75001L6.99999 1.68935L6.46966 2.21968L1.39644 7.2929C1.00592 7.68342 1.00592 8.31659 1.39644 8.70711L6.46966 13.7803Z" />
+                </svg>
               </button>
             </div>
 
             {/* Call Control Buttons */}
             <div className="px-6 py-4 border-b border-border bg-muted/30">
               <div className="flex gap-2">
-                <motion.button
-                  whileHover={callAnswered ? { scale: 1.05 } : {}}
-                  whileTap={callAnswered ? { scale: 0.95 } : {}}
-                  disabled={!callAnswered}
-                  className={cn(
-                    "flex-1 px-4 py-2 bg-white border border-border text-foreground rounded-lg text-base font-medium transition-colors flex items-center justify-center gap-2",
-                    callAnswered ? "hover:bg-muted cursor-pointer" : "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  <Pause size={16} />
-                  Hold Call
-                </motion.button>
-                <motion.button
-                  whileHover={callAnswered ? { scale: 1.05 } : {}}
-                  whileTap={callAnswered ? { scale: 0.95 } : {}}
-                  disabled={!callAnswered}
-                  className={cn(
-                    "flex-1 px-4 py-2 bg-white border border-border text-foreground rounded-lg text-base font-medium transition-colors flex items-center justify-center gap-2",
-                    callAnswered ? "hover:bg-muted cursor-pointer" : "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  <ArrowRightLeft size={16} />
-                  Transfer
-                </motion.button>
+                {callAnswered && (
+                  <>
+                    <motion.button
+                      className="flex-1 px-4 py-2 bg-white border border-border text-foreground rounded-lg text-base font-medium transition-colors flex items-center justify-center gap-2 hover:bg-muted cursor-pointer"
+                    >
+                      <Pause size={16} />
+                      Hold Call
+                    </motion.button>
+                    <motion.button
+                      className="flex-1 px-4 py-2 bg-white border border-border text-foreground rounded-lg text-base font-medium transition-colors flex items-center justify-center gap-2 hover:bg-muted cursor-pointer"
+                    >
+                      <ArrowRightLeft size={16} />
+                      Transfer
+                    </motion.button>
+                  </>
+                )}
                 {!callAnswered ? (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                     onClick={handleAnswerCall}
                     className="flex-1 px-4 py-2 bg-green-50 border border-green-200 text-green-600 rounded-lg text-base font-medium hover:bg-green-100 transition-colors flex items-center justify-center gap-2"
                   >
@@ -396,8 +405,6 @@ Sarah will be notified via Email & SMS`
                   </motion.button>
                 ) : (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                     className="flex-1 px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-lg text-base font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                   >
                     <PhoneOff size={16} />
@@ -407,52 +414,33 @@ Sarah will be notified via Email & SMS`
               </div>
             </div>
 
-            {/* Call Info */}
-            <div className="px-6 py-3 border-b border-border bg-muted/30">
-              <div className="flex items-center justify-between text-base">
-                <div className="flex items-center gap-2">
-                  <Phone size={16} className="text-muted-foreground" />
-                  {callAnswered ? (
-                    <>
-                      <span className="text-muted-foreground">Duration:</span>
-                      <span className="font-medium">{formatDuration(callDuration)}</span>
-                    </>
-                  ) : (
-                    <span className="font-medium">
-                      Click to answer
-                      <span className="inline-block w-4 ml-1">
-                        <span className="inline-block animate-dots" style={{ animationDelay: '0s' }}>.</span>
-                        <span className="inline-block animate-dots" style={{ animationDelay: '0.2s' }}>.</span>
-                        <span className="inline-block animate-dots" style={{ animationDelay: '0.4s' }}>.</span>
-                      </span>
-                    </span>
-                  )}
-                </div>
-                {callAnswered && (
-                  <div className="flex items-center gap-2">
-                    <Mic size={16} className="text-foreground" />
-                    <span className="text-sm text-foreground font-medium">Transcribing</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Transcript Content */}
             <div 
               ref={scrollContainerRef}
-              className="flex-1 overflow-y-auto p-6"
+              className="flex-1 overflow-y-auto p-6 bg-sidebar"
             >
-              <div className="space-y-4">
-                {mockLiveCall.messages.slice(0, visibleMessages).map((message, index) => (
-                  <TranscriptMessageItem 
-                    key={message.id} 
-                    message={message} 
-                    index={index}
-                    onApplyReschedule={handleApplyReschedule}
-                    onViewImpact={handleViewImpact}
-                  />
-                ))}
-              </div>
+              {!callAnswered ? (
+                <div className="h-full flex flex-col items-center justify-center gap-3 min-h-[200px]">
+                  <p className="font-semibold text-sm text-muted-foreground">
+                    {mockLiveCall.customer.name} is on hold
+                  </p>
+                  <p className="text-xs text-muted-foreground/60">
+                    Transcript will appear once the call is answered
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {mockLiveCall.messages.slice(0, visibleMessages).map((message, index) => (
+                    <TranscriptMessageItem 
+                      key={message.id} 
+                      message={message} 
+                      index={index}
+                      onApplyReschedule={handleApplyReschedule}
+                      onViewImpact={handleViewImpact}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
         </div>
       )}

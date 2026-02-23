@@ -16,19 +16,27 @@ interface SidebarProps {
   currentCustomerId?: string
   recentlyViewed?: RecentlyViewedCustomer[]
   onSelectRecentCustomer?: (id: string) => void
+  isTranscriptOpen?: boolean
+  onToggleTranscript?: () => void
 }
 
-export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChange, currentCustomerName, currentCustomerId, recentlyViewed = [], onSelectRecentCustomer }: SidebarProps) {
+export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChange, currentCustomerName, currentCustomerId, recentlyViewed = [], onSelectRecentCustomer, isTranscriptOpen = false, onToggleTranscript }: SidebarProps) {
   const [imageError, setImageError] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const PULSE_MS = 2000
+  const [pulseDelay, setPulseDelay] = useState('0s')
+  useEffect(() => {
+    setPulseDelay(`-${(Date.now() % PULSE_MS) / 1000}s`)
+  }, [])
 
   return (
     <aside
       className={cn(
-        "w-60 h-screen bg-sidebar border-r border-sidebar-border",
-        "flex flex-col"
+        "relative z-10 w-60 h-screen bg-sidebar border-r border-sidebar-border",
+        "flex flex-col shrink-0",
+        "shadow-[1px_0_8px_-2px_rgba(0,0,0,0.04),2px_0_12px_-4px_rgba(0,0,0,0.03)]"
       )}
     >
       {/* Header */}
@@ -48,12 +56,12 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
               <span className="text-white text-sm font-bold">P</span>
             )}
           </div>
-          <h2 className="text-base font-semibold">PromisePay</h2>
+          <h2 className="text-base font-semibold text-sidebar-foreground">PromisePay</h2>
         </div>
       </div>
 
       {/* Search */}
-      <div className="px-4 pt-4 pb-2 shrink-0">
+      <div className="px-4 pt-4 pb-3 shrink-0">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -76,7 +84,7 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
             }}
             className={cn(
               "w-full pl-9 pr-3 py-2 text-base",
-              "bg-background border border-border rounded-md",
+              "bg-background border border-border rounded-md shadow-inner",
               "focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent",
               "placeholder:text-muted-foreground"
             )}
@@ -85,9 +93,9 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
       </div>
 
       {/* Dashboard */}
-      <div className="px-2 py-2 shrink-0">
+      <div className="px-2 pt-1 pb-2 shrink-0">
         <button 
-          className="w-full text-left px-3 py-2 rounded-md transition-colors text-base font-medium flex items-center gap-2"
+          className="w-full text-left px-3 py-2 rounded-md transition-colors text-base font-normal flex items-center gap-2"
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#E5E5E5'
           }}
@@ -95,30 +103,59 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
         >
-          <svg data-testid="geist-icon" height="16" strokeLinejoin="round" viewBox="0 0 16 16" width="16" style={{ color: 'currentColor' }}>
-            <path fillRule="evenodd" clipRule="evenodd" d="M12.5 6.56062L8.00001 2.06062L3.50001 6.56062V13.5L6.00001 13.5V11C6.00001 9.89539 6.89544 8.99996 8.00001 8.99996C9.10458 8.99996 10 9.89539 10 11V13.5L12.5 13.5V6.56062ZM13.78 5.71933L8.70711 0.646409C8.31659 0.255886 7.68342 0.255883 7.2929 0.646409L2.21987 5.71944C2.21974 5.71957 2.21961 5.7197 2.21949 5.71982L0.469676 7.46963L-0.0606537 7.99996L1.00001 9.06062L1.53034 8.53029L2.00001 8.06062V14.25V15H2.75001L6.00001 15H7.50001H8.50001H10L13.25 15H14V14.25V8.06062L14.4697 8.53029L15 9.06062L16.0607 7.99996L15.5303 7.46963L13.7806 5.71993C13.7804 5.71973 13.7802 5.71953 13.78 5.71933ZM8.50001 11V13.5H7.50001V11C7.50001 10.7238 7.72386 10.5 8.00001 10.5C8.27615 10.5 8.50001 10.7238 8.50001 11Z" fill="currentColor" />
+          <svg data-testid="geist-icon" height={16} width={16} strokeLinejoin="round" viewBox="0 0 16 16" style={{ color: 'currentColor' }} fill="currentColor" aria-hidden>
+            <path fillRule="evenodd" clipRule="evenodd" d="M2.5 5.5V2.5H5.5V5.5H2.5ZM1 2C1 1.44772 1.44772 1 2 1H6C6.55228 1 7 1.44772 7 2V6C7 6.55228 6.55228 7 6 7H2C1.44772 7 1 6.55228 1 6V2ZM2.5 13.5V10.5H5.5V13.5H2.5ZM1 10C1 9.44772 1.44772 9 2 9H6C6.55228 9 7 9.44772 7 10V14C7 14.5523 6.55228 15 6 15H2C1.44772 15 1 14.5523 1 14V10ZM10.5 2.5V5.5H13.5V2.5H10.5ZM10 1C9.44772 1 9 1.44772 9 2V6C9 6.55228 9.44772 7 10 7H14C14.5523 7 15 6.55228 15 6V2C15 1.44772 14.5523 1 14 1H10ZM10.5 13.5V10.5H13.5V13.5H10.5ZM9 10C9 9.44772 9.44772 9 10 9H14C14.5523 9 15 9.44772 15 10V14C15 14.5523 14.5523 15 14 15H10C9.44772 15 9 14.5523 9 14V10Z" />
           </svg>
           Dashboard
         </button>
         {/* Current customer or live call pill - when call answered, show live call here instead */}
         {(callAnswered && hasLiveCall) ? (
-          <div className="px-3 py-2">
+          <div className="px-3 pt-1 pb-2">
             <div className="rounded-md px-3 py-2 flex items-center gap-2" style={{ backgroundColor: '#EBEBEB' }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
-              <p className="text-base font-medium">{mockLiveCall.customer.name}</p>
+              <p className="text-base font-normal">{mockLiveCall.customer.name}</p>
             </div>
           </div>
         ) : currentCustomerName ? (
-          <div className="px-3 py-2">
+          <div className="px-3 pt-1 pb-2">
             <div className="rounded-md px-3 py-2" style={{ backgroundColor: '#EBEBEB' }}>
-              <p className="text-base font-medium">{currentCustomerName}</p>
+              <p className="text-base font-normal">{currentCustomerName}</p>
             </div>
           </div>
         ) : null}
+        {/* Call status strip - nested below active client, toggles transcript drawer */}
+        {((callAnswered && hasLiveCall) || currentCustomerName) && onToggleTranscript && (
+          <div className="pl-6 pr-2 pt-0 pb-2">
+            <button
+              type="button"
+              onClick={onToggleTranscript}
+              className={cn(
+                'w-full text-left px-3 py-2 rounded-md transition-colors flex items-center gap-2',
+                'hover:bg-muted/50'
+              )}
+            >
+              <div
+                className={cn(
+                  'w-1.5 h-1.5 rounded-full shrink-0',
+                  callAnswered ? 'bg-green-500 animate-pulse' : 'bg-blue-500 animate-pulse'
+                )}
+                style={{ animationDelay: pulseDelay }}
+              />
+              <span
+                className={cn(
+                  'text-[10px] font-semibold uppercase tracking-wider',
+                  callAnswered ? 'text-green-700' : 'text-blue-700'
+                )}
+                style={{ fontVariant: 'small-caps' }}
+              >
+                {callAnswered ? 'Call in progress' : 'Call waiting'}
+              </span>
+            </button>
+          </div>
+        )}
         {/* Recently Viewed */}
         {recentlyViewed.filter((c) => c.id !== currentCustomerId).length > 0 && (
-          <div className="px-2 py-2 shrink-0">
-            <p className="text-sm text-muted-foreground mb-2 px-3">Recently viewed</p>
+          <div className="px-2 pt-4 pb-2 shrink-0">
+            <p className="text-xs font-normal text-muted-foreground mb-2 px-3">RECENTLY VIEWED</p>
             <div className="space-y-1">
               {recentlyViewed.filter((c) => c.id !== currentCustomerId).map((customer) => (
                 <motion.div
@@ -134,7 +171,7 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
                   }}
                   onClick={() => onSelectRecentCustomer?.(customer.id)}
                 >
-                  <p className="text-base">{customer.name}</p>
+                  <p className="text-base font-normal">{customer.name}</p>
                 </motion.div>
               ))}
             </div>
@@ -144,26 +181,8 @@ export function Sidebar({ hasLiveCall = true, callAnswered = false, onSearchChan
 
       {/* Live Call & Call Queue Section */}
       <div className="flex-1 overflow-y-auto">
-        {/* Live Call Section - Only show when active and not yet answered (waiting state) */}
-        {hasLiveCall && !callAnswered && (
-          <div className="px-6 pt-2 pb-4">
-            <p className="text-sm text-muted-foreground mb-2">Live call</p>
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-muted rounded-lg p-3"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-blue-500" />
-                <p className="text-base font-medium">{mockLiveCall.customer.name}</p>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-
         {/* Bottom Navigation */}
-        <div className="px-2 pt-2 pb-4 border-t border-sidebar-border space-y-1">
+        <div className="px-2 pt-4 pb-4 border-t border-sidebar-border space-y-1">
           <button 
             className="w-full text-left px-3 py-2 rounded-md transition-colors text-base font-normal flex items-center gap-2"
             onMouseEnter={(e) => {

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Payment } from '@/lib/mock-data'
 import { PaymentReceiptModal } from './payment-receipt-modal'
 import { cn } from '@/lib/utils'
+import { FileText } from 'lucide-react'
 
 interface PaymentTableProps {
   nextPaymentDate: string
@@ -12,9 +13,10 @@ interface PaymentTableProps {
   paymentHistory: Payment[]
   autoPay?: boolean
   eligibleForExtension?: boolean
+  onPayNow?: () => void
 }
 
-export function PaymentTable({ nextPaymentDate, nextPaymentAmount, paymentHistory, autoPay = false, eligibleForExtension = false }: PaymentTableProps) {
+export function PaymentTable({ nextPaymentDate, nextPaymentAmount, paymentHistory, autoPay = false, eligibleForExtension = false, onPayNow }: PaymentTableProps) {
   const [showHistory, setShowHistory] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<{ receipt: Payment['receipt'], amount: number, date: string } | null>(null)
 
@@ -44,56 +46,36 @@ export function PaymentTable({ nextPaymentDate, nextPaymentAmount, paymentHistor
       className="bg-card border border-border rounded-md overflow-hidden"
     >
       {/* Table Header */}
-      <div className="bg-muted border-b border-border px-6 py-3 grid grid-cols-3 gap-6 items-center">
-        <p className="text-base font-medium text-muted-foreground">
-          {showHistory ? 'Payment history' : 'Upcoming payment'}
-        </p>
-        <p className="text-base font-medium text-muted-foreground pl-16">Payment Method</p>
+      <div className="bg-muted border-b border-border px-6 py-3 grid grid-cols-2 sm:grid-cols-3 gap-6 items-center">
+        <p className="text-base font-medium text-muted-foreground">Upcoming Due Date</p>
+        <p className="text-base font-medium text-muted-foreground pl-16 hidden sm:block">Payment Method</p>
         <p className="text-base font-medium text-muted-foreground text-right">Amount</p>
       </div>
 
-      {/* Upcoming Payment Row */}
-      {!showHistory && (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          onClick={() => {
-            // Show receipt for upcoming payment using the most recent payment's receipt as template
-            if (paymentHistory.length > 0 && paymentHistory[0].receipt) {
-              const mostRecentReceipt = paymentHistory[0].receipt
-              // Create a receipt for the upcoming payment based on the most recent one
-              const upcomingReceipt = {
-                ...mostRecentReceipt,
-                referenceId: `TXN-${nextPaymentDate.replace(/\s/g, '-').toLowerCase()}-UPCOMING`,
-                transactionDate: nextPaymentDate,
-                transactionTime: 'Scheduled',
-              }
-              setSelectedReceipt({ 
-                receipt: upcomingReceipt, 
-                amount: nextPaymentAmount, 
-                date: nextPaymentDate 
-              })
-            }
-          }}
-          className="px-6 py-4 grid grid-cols-3 gap-6 items-center bg-white hover:bg-muted/50 transition-colors cursor-pointer"
-        >
-          <p className="text-base">{nextPaymentDate}</p>
-          <p className="text-base text-muted-foreground pl-16 whitespace-nowrap flex items-center gap-1.5">
-            {paymentHistory.length > 0 && paymentHistory[0].receipt?.bankName && paymentHistory[0].receipt?.bankAccountLast4
-              ? (
-                  <>
-                    {renderBankName(paymentHistory[0].receipt.bankName)} ••••{paymentHistory[0].receipt.bankAccountLast4}
-                    {autoPay && <span className="text-sm ml-2">(Auto-Pay)</span>}
-                  </>
-                )
-              : '—'}
-          </p>
-          <p className="text-base font-medium text-right">${nextPaymentAmount.toFixed(2)}</p>
-        </motion.div>
-      )}
+      {/* Upcoming Payment Row - always shown */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className="px-6 py-4 grid grid-cols-2 sm:grid-cols-3 gap-6 items-center bg-white border-b border-border"
+      >
+        <p className="text-base">{nextPaymentDate}</p>
+        <p className="text-base text-muted-foreground pl-16 hidden sm:block">
+          {paymentHistory.length > 0 && paymentHistory[0].receipt?.bankName && paymentHistory[0].receipt?.bankAccountLast4
+            ? (
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                  {renderBankName(paymentHistory[0].receipt.bankName)} ••••{paymentHistory[0].receipt.bankAccountLast4}
+                  {autoPay && <span className="shrink-0 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Auto-Pay</span>}
+                </span>
+              )
+            : '—'}
+        </p>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className="text-base font-medium">${nextPaymentAmount.toFixed(2)}</span>
+        </div>
+      </motion.div>
 
-      {/* Payment History Rows */}
+      {/* Payment History - separator and rows when expanded */}
       <AnimatePresence>
         {showHistory && (
           <motion.div
@@ -103,45 +85,58 @@ export function PaymentTable({ nextPaymentDate, nextPaymentAmount, paymentHistor
             transition={{ duration: 0.3 }}
             className="divide-y divide-border"
           >
-            {paymentHistory.map((payment, index) => {
-              const isClickable = payment.status === 'paid' && payment.receipt
-              const receipt = payment.receipt
-              const hasBankInfo = receipt?.bankName && receipt?.bankAccountLast4
-              
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.05 }}
-                  onClick={() => {
-                    if (isClickable) {
-                      setSelectedReceipt({ receipt: payment.receipt!, amount: payment.amount, date: payment.date })
-                    }
-                  }}
-                  className={cn(
-                    "w-full px-6 py-4 grid grid-cols-3 gap-6 items-center bg-white transition-colors",
-                    isClickable 
-                      ? "hover:bg-muted/50 cursor-pointer" 
-                      : "cursor-default"
-                  )}
-                >
-                  <p className="text-base">{payment.date}</p>
-                  <p className="text-base text-muted-foreground pl-16 flex items-center gap-1.5">
-                    {hasBankInfo ? (
-                      <>
-                        {renderBankName(receipt!.bankName ?? '')} ••••{receipt!.bankAccountLast4}
-                      </>
-                    ) : (
-                      receipt?.paymentMethod || '—'
+            <div className="px-6 py-2 bg-muted/50 border-b border-border">
+              <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Payment history</p>
+            </div>
+            {paymentHistory.length === 0 ? (
+              <div className="px-6 py-12 flex flex-col items-center justify-center text-center">
+                <FileText className="w-12 h-12 text-muted-foreground/60 mb-3" aria-hidden />
+                <p className="text-base font-medium text-foreground mb-1">No payment history yet</p>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  Payments will appear here once the first installment is processed.
+                </p>
+              </div>
+            ) : (
+              paymentHistory.map((payment, index) => {
+                const isClickable = payment.status === 'paid' && payment.receipt
+                const receipt = payment.receipt
+                const hasBankInfo = receipt?.bankName && receipt?.bankAccountLast4
+
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                    onClick={() => {
+                      if (isClickable) {
+                        setSelectedReceipt({ receipt: payment.receipt!, amount: payment.amount, date: payment.date })
+                      }
+                    }}
+                    className={cn(
+                      "w-full px-6 py-4 grid grid-cols-2 sm:grid-cols-3 gap-6 items-center bg-white transition-colors",
+                      isClickable
+                        ? "hover:bg-muted/50 cursor-pointer"
+                        : "cursor-default"
                     )}
-                  </p>
-                  <p className="text-base font-medium text-right">
-                    ${payment.amount.toFixed(2)}
-                  </p>
-                </motion.div>
-              )
-            })}
+                  >
+                    <p className="text-base">{payment.date}</p>
+                    <p className="text-base text-muted-foreground pl-16 hidden sm:block min-w-0 overflow-hidden text-ellipsis">
+                      {hasBankInfo ? (
+                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                          {renderBankName(receipt!.bankName ?? '')} ••••{receipt!.bankAccountLast4}
+                        </span>
+                      ) : (
+                        receipt?.paymentMethod || '—'
+                      )}
+                    </p>
+                    <p className="text-base font-medium text-right">
+                      ${payment.amount.toFixed(2)}
+                    </p>
+                  </motion.div>
+                )
+              })
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -149,8 +144,9 @@ export function PaymentTable({ nextPaymentDate, nextPaymentAmount, paymentHistor
       {/* Footer */}
       <div className="px-3 py-3 border-t border-border text-center">
         <button
+          type="button"
           onClick={() => setShowHistory(!showHistory)}
-          className="text-base text-foreground underline hover:text-accent transition-colors"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-4 py-2 text-base text-foreground underline hover:text-accent transition-colors"
         >
           {showHistory ? 'Hide payment history' : 'View payment history'}
         </button>

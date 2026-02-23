@@ -59,6 +59,7 @@ export interface Customer {
   payments: Payment[];
   eligibleForExtension?: boolean;
   eligibleForRollIn?: boolean;
+  avatarUrl?: string;
 }
 
 export const mockCustomer: Customer & {
@@ -94,60 +95,60 @@ export const mockCustomer: Customer & {
   isTestAccount: false,
   payments: [
     { 
-      date: 'December 27th, 2025', 
+      date: 'November 27th, 2025', 
       amount: 120.69,
       status: 'paid',
       receipt: {
-        referenceId: 'TXN-2025-12-27-001234',
+        referenceId: 'TXN-2025-11-27-003456',
         cardLast4: '4242',
         cardBrand: 'Visa',
         paymentMethod: 'Bank Account',
-        transactionDate: 'December 27th, 2025',
+        transactionDate: 'November 27th, 2025',
         transactionTime: '10:34 AM',
         bankAccountLast4: '7892',
         bankName: 'Chase Bank',
       }
     },
     { 
-      date: 'January 27th, 2026', 
+      date: 'October 27th, 2025', 
       amount: 120.69,
       status: 'paid',
       receipt: {
-        referenceId: 'TXN-2026-01-27-005678',
+        referenceId: 'TXN-2025-10-27-009012',
         cardLast4: '4242',
         cardBrand: 'Visa',
         paymentMethod: 'Bank Account',
-        transactionDate: 'January 27th, 2026',
-        transactionTime: '10:34 AM',
-        bankAccountLast4: '4563',
-        bankName: 'Bank of America',
-      }
-    },
-    { 
-      date: 'February 27th, 2026', 
-      amount: 120.69,
-      status: 'paid',
-      receipt: {
-        referenceId: 'TXN-2026-02-27-009012',
-        cardLast4: '4242',
-        cardBrand: 'Visa',
-        paymentMethod: 'Bank Account',
-        transactionDate: 'February 27th, 2026',
+        transactionDate: 'October 27th, 2025',
         transactionTime: '10:34 AM',
         bankAccountLast4: '2341',
         bankName: 'Wells Fargo',
       }
     },
     { 
-      date: 'March 27th, 2026', 
+      date: 'September 27th, 2025', 
       amount: 120.69,
       status: 'paid',
       receipt: {
-        referenceId: 'TXN-2026-03-27-003456',
+        referenceId: 'TXN-2025-09-27-005678',
         cardLast4: '4242',
         cardBrand: 'Visa',
         paymentMethod: 'Bank Account',
-        transactionDate: 'March 27th, 2026',
+        transactionDate: 'September 27th, 2025',
+        transactionTime: '10:34 AM',
+        bankAccountLast4: '4563',
+        bankName: 'Bank of America',
+      }
+    },
+    { 
+      date: 'August 27th, 2025', 
+      amount: 120.69,
+      status: 'paid',
+      receipt: {
+        referenceId: 'TXN-2025-08-27-001234',
+        cardLast4: '4242',
+        cardBrand: 'Visa',
+        paymentMethod: 'Bank Account',
+        transactionDate: 'August 27th, 2025',
         transactionTime: '10:34 AM',
         bankAccountLast4: '7892',
         bankName: 'Chase Bank',
@@ -168,6 +169,7 @@ export type MockCustomer = Customer & {
 export const mockCustomerMichaelChen: MockCustomer = {
   id: '1',
   name: 'Michael Chen',
+  avatarUrl: 'https://images.unsplash.com/photo-1534030349089-c1f6135f4f9c?w=256&h=256&fit=crop',
   email: 'm.chen@email.com',
   phone: '(555) 987-6543',
   address: '4521 Oak Ave, San Francisco, CA 94102',

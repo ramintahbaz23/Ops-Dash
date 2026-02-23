@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
@@ -27,25 +27,47 @@ export function MakePaymentModal({
   const [customPaymentMethod, setCustomPaymentMethod] = useState<'bank' | 'card'>('bank')
   const [bankName, setBankName] = useState('')
   const [accountLast4, setAccountLast4] = useState('')
+  const [validationError, setValidationError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isOpen) setValidationError(null)
+  }, [isOpen])
+
+  const handleClose = () => {
+    setValidationError(null)
+    onClose()
+  }
 
   const handleConfirm = () => {
+    setValidationError(null)
     const numAmount = parseFloat(amount)
     if (numAmount > 0) {
       let paymentMethod = currentPaymentMethod || 'Default payment method'
-      
+
       if (!useDefaultMethod) {
-        if (customPaymentMethod === 'bank' && bankName && accountLast4.length === 4) {
+        if (customPaymentMethod === 'bank') {
+          if (!bankName?.trim()) {
+            setValidationError('Bank name is required to continue.')
+            return
+          }
+          if (accountLast4.length !== 4) {
+            setValidationError('Please enter the last 4 digits of the account.')
+            return
+          }
           paymentMethod = `${bankName} ••••${accountLast4}`
-        } else if (customPaymentMethod === 'card' && accountLast4.length === 4) {
+        } else if (customPaymentMethod === 'card') {
+          if (accountLast4.length !== 4) {
+            setValidationError('Please enter the last 4 digits of the card.')
+            return
+          }
           paymentMethod = `Card ••••${accountLast4}`
         } else {
-          // Don't proceed if custom method is incomplete
           return
         }
       }
-      
+
       onConfirm(numAmount, paymentType, paymentMethod)
-      onClose()
+      handleClose()
     }
   }
 
@@ -64,7 +86,7 @@ export function MakePaymentModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleClose}
             className="fixed inset-0 bg-black/50 z-40"
           />
           
@@ -82,8 +104,8 @@ export function MakePaymentModal({
               <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
                 <h2 className="text-lg font-semibold">Make Payment</h2>
                 <button
-                  onClick={onClose}
-                  className="p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground"
+                  onClick={handleClose}
+                  className="min-h-[44px] min-w-[44px] p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground flex items-center justify-center"
                   aria-label="Close modal"
                 >
                   <X size={20} />
@@ -97,11 +119,12 @@ export function MakePaymentModal({
                     <label className="block text-base font-medium mb-2">Apply payment to</label>
                     <div className="flex flex-wrap gap-3">
                       <button
+                        type="button"
                         onClick={() => {
                           setPaymentType('plan')
                           setAmount(nextPaymentAmount.toFixed(2))
                         }}
-                        className={`px-4 py-2 rounded-md border transition-colors ${
+                        className={`min-h-[44px] min-w-[44px] px-4 py-2 rounded-md border transition-colors ${
                           paymentType === 'plan'
                             ? 'bg-accent text-accent-foreground border-accent'
                             : 'bg-background border-border hover:bg-muted'
@@ -110,11 +133,12 @@ export function MakePaymentModal({
                         Payment Plan
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           setPaymentType('utility')
                           setAmount(utilityTotalBalance.toFixed(2))
                         }}
-                        className={`px-4 py-2 rounded-md border transition-colors ${
+                        className={`min-h-[44px] min-w-[44px] px-4 py-2 rounded-md border transition-colors ${
                           paymentType === 'utility'
                             ? 'bg-accent text-accent-foreground border-accent'
                             : 'bg-background border-border hover:bg-muted'
@@ -123,11 +147,12 @@ export function MakePaymentModal({
                         Utility Bill
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           setPaymentType('both')
                           setAmount((nextPaymentAmount + utilityTotalBalance).toFixed(2))
                         }}
-                        className={`px-4 py-2 rounded-md border transition-colors ${
+                        className={`min-h-[44px] min-w-[44px] px-4 py-2 rounded-md border transition-colors ${
                           paymentType === 'both'
                             ? 'bg-accent text-accent-foreground border-accent'
                             : 'bg-background border-border hover:bg-muted'
@@ -187,7 +212,10 @@ export function MakePaymentModal({
                         <input
                           type="radio"
                           checked={!useDefaultMethod}
-                          onChange={() => setUseDefaultMethod(false)}
+                          onChange={() => {
+                            setUseDefaultMethod(false)
+                            setValidationError(null)
+                          }}
                           className="w-4 h-4"
                         />
                         <span className="text-base">Use a different payment method</span>
@@ -200,8 +228,9 @@ export function MakePaymentModal({
                           <label className="block text-base font-medium mb-2">Payment Method Type</label>
                           <div className="flex gap-3">
                             <button
+                              type="button"
                               onClick={() => setCustomPaymentMethod('bank')}
-                              className={`px-4 py-2 rounded-md border transition-colors ${
+                              className={`min-h-[44px] min-w-[44px] px-4 py-2 rounded-md border transition-colors ${
                                 customPaymentMethod === 'bank'
                                   ? 'bg-accent text-accent-foreground border-accent'
                                   : 'bg-background border-border hover:bg-muted'
@@ -210,8 +239,9 @@ export function MakePaymentModal({
                               Bank Account
                             </button>
                             <button
+                              type="button"
                               onClick={() => setCustomPaymentMethod('card')}
-                              className={`px-4 py-2 rounded-md border transition-colors ${
+                              className={`min-h-[44px] min-w-[44px] px-4 py-2 rounded-md border transition-colors ${
                                 customPaymentMethod === 'card'
                                   ? 'bg-accent text-accent-foreground border-accent'
                                   : 'bg-background border-border hover:bg-muted'
@@ -227,8 +257,11 @@ export function MakePaymentModal({
                             <label className="block text-base font-medium mb-2">Bank Name</label>
                             <input
                               type="text"
-                              value={bankName}
-                              onChange={(e) => setBankName(e.target.value)}
+                        value={bankName}
+                        onChange={(e) => {
+                          setBankName(e.target.value)
+                          setValidationError(null)
+                        }}
                               placeholder="e.g., Chase Bank"
                               className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
                             />
@@ -245,6 +278,7 @@ export function MakePaymentModal({
                             onChange={(e) => {
                               const value = e.target.value.replace(/\D/g, '').slice(0, 4)
                               setAccountLast4(value)
+                              setValidationError(null)
                             }}
                             placeholder="1234"
                             maxLength={4}
@@ -257,22 +291,31 @@ export function MakePaymentModal({
                 </div>
               </div>
 
+              {/* Validation error banner */}
+              {validationError && (
+                <div className="mx-6 mt-2 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm" role="alert">
+                  {validationError}
+                </div>
+              )}
+
               {/* Footer */}
               <div className="px-6 py-4 border-t border-border flex items-center justify-end shrink-0 gap-3">
                 <button
-                  onClick={onClose}
-                  className="px-4 py-2 text-base font-medium bg-muted border border-border text-foreground hover:bg-muted/80 rounded-md transition-colors"
+                  type="button"
+                  onClick={handleClose}
+                  className="min-h-[44px] min-w-[44px] px-4 py-2 text-base font-medium bg-muted border border-border text-foreground hover:bg-muted/80 rounded-md transition-colors"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleConfirm}
                   disabled={
                     !amount || 
                     parseFloat(amount) <= 0 ||
                     (!useDefaultMethod && (!accountLast4 || accountLast4.length !== 4 || (customPaymentMethod === 'bank' && !bankName)))
                   }
-                  className="px-4 py-2 text-base font-medium bg-accent text-accent-foreground hover:bg-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="min-h-[44px] min-w-[44px] px-4 py-2 text-base font-medium bg-accent text-accent-foreground hover:bg-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Process Payment
                 </button>
