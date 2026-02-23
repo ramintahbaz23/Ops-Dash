@@ -1,25 +1,20 @@
 # Ops Dash - PromisePay Dashboard
 
-A modern operations dashboard built with Next.js, inspired by Notion's design system and based on the Figma design.
+A Next.js operations dashboard for PromisePay. Built from the Figma spec.
 
 ## Features
 
-- 🎨 **Notion-style UI** - Clean, minimal design with Notion's color scheme and spacing
-- 📱 **Collapsible Sidebar** - Smooth animations for sidebar collapse/expand
-- 🎭 **Framer Motion Animations** - Smooth transitions and micro-interactions
-- 🔤 **Geist Font** - Modern typography using Vercel's Geist font family
-- 📊 **Dashboard Components** - Metric cards, payment tables, action menus
-- 🎯 **Live Call Panel** - Real-time call management interface
-- 🌓 **Dark Mode Ready** - Color scheme supports both light and dark modes
+- **Collapsible sidebar** – Expand/collapse navigation
+- **Dashboard** – Metric cards, payment tables, action menus
+- **Live call panel** – Real-time call management
+- **Dark mode** – Light and dark color schemes
 
 ## Tech Stack
 
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **Lucide React** - Icon library
-- **Geist Font** - Vercel's modern font family
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Lucide React (icons)
 
 ## Getting Started
 
@@ -54,9 +49,9 @@ npm start
 ```
 ops-dash/
 ├── app/
-│   ├── layout.tsx          # Root layout with Geist fonts
+│   ├── layout.tsx          # Root layout
 │   ├── page.tsx            # Main dashboard page
-│   └── globals.css         # Global styles + Notion colors
+│   └── globals.css         # Global styles and theme
 ├── components/
 │   └── dashboard/
 │       ├── sidebar.tsx      # Collapsible sidebar
@@ -71,30 +66,11 @@ ops-dash/
 └── package.json
 ```
 
-## Design System
+## Theme
 
-### Colors
-- Uses Notion's color palette with CSS variables
-- Supports light and dark modes
-- Accent color: `#3b5bdb` (blue)
-
-### Typography
-- Font: Geist Sans (via `geist` package)
-- Sizes follow Notion's typography scale
-
-### Spacing
-- Based on Notion's 4px grid system
-- Generous padding and gaps for readability
-
-### Animations
-- Smooth transitions using Framer Motion
-- Hover effects on interactive elements
-- Staggered animations for list items
+Colors and spacing can be adjusted in `app/globals.css`.
 
 ## Customization
-
-### Colors
-Edit `app/globals.css` to customize the color scheme.
 
 ### Components
 All components are in `components/dashboard/` and can be easily customized.
@@ -105,9 +81,3 @@ Update `lib/mock-data.ts` to change the dashboard data.
 ## License
 
 MIT
-
-
-
-
-
-

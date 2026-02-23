@@ -483,7 +483,7 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
               <button
                 type="button"
                 onClick={() => setShowManagePlan(!showManagePlan)}
-                className="min-h-[44px] px-5 py-2.5 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90 rounded-md transition-colors whitespace-nowrap"
+                className="min-h-[44px] px-5 py-2.5 text-base font-semibold bg-black text-white hover:bg-black/90 rounded-md transition-colors whitespace-nowrap"
               >
                 Manage plan
               </button>
@@ -494,7 +494,7 @@ export default function Dashboard({ params, searchParams }: DashboardProps = {})
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute left-0 top-full mt-2 w-64 bg-card border border-border rounded-md shadow-lg z-50"
+                    className="absolute right-0 left-auto top-full mt-2 w-64 bg-card border border-border rounded-md shadow-lg z-50"
                   >
                     <div className="py-1">
                       {managePlanActions.map((action, index) => (
